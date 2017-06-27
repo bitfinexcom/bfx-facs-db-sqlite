@@ -40,8 +40,8 @@ class Sqlite extends Facility {
       next => {
         try {
           this.db.close()
-        } catch(e) {
-          console.error(err)
+        } catch (e) {
+          console.error(e)
         }
         delete this.db
         next()
