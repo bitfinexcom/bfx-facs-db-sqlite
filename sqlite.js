@@ -10,7 +10,7 @@ class Sqlite extends Facility {
     super(caller, opts, ctx)
 
     this.name = 'db-sqlite'
-    this._hasConf = true
+    this._hasConf = false
 
     this.opts = _.defaults({}, opts, this.opts, {
       db: `${__dirname}/../../db/${this.name}_${this.opts.name}_${this.opts.label}.db`
@@ -42,46 +42,50 @@ class Sqlite extends Facility {
   }
 
   cupsert (opts, cb) {
-    const { table, selectKey, selectValue, process } = opts
+    const { table, pkey, pval, process } = opts
+    
     const d = {}
-    d[`$${selectKey}`] = `${selectValue}`
+    d[`$${pkey}`] = `${pval}`
 
     this.db.all(
-      `SELECT * from ${table} WHERE ${selectKey} = $${selectKey}`,
+      `SELECT * from ${table} WHERE ${pkey} = $${pkey}`,
       d,
       (err, res) => {
         if (err) return cb(err)
+   
         process(res, (err, data) => {
           if (err) return cb(err)
-          this.upsert({ table, selectKey, selectValue, data }, cb)
+          this.upsert({ table, pkey, pval, data }, cb)
         })
       })
   }
 
-  _buildUpsertQuery ({ table, selectKey, selectValue, data }) {
-    if (!table || !selectKey || !selectValue || !data) {
+  _buildUpsertQuery ({ table, pkey, pval, data }) {
+    if (!table || !pkey || !pval || !data) {
       console.error(
         '_buildUpsertQuery missing argument:',
-        `${table}, ${selectKey}, ${selectValue}, ${data}`
+        `${table}, ${pkey}, ${pval}, ${data}`
       )
       console.trace()
     }
 
-    const fields = _.keys(data)
-    const placeholders = _.map((el, i) => {
-      if (el === selectKey) {
-        return `(SELECT ${el} FROM ${table} WHERE ${selectKey} = $${selectKey})`
-      }
+    data[pkey] = pval
 
-      return ` $${el}`
+    const fields = _.keys(data)
+    
+    const placeholders = _.map(fields, k => {
+      if (data[k]) {
+        return `$${k}`
+      } else {
+        return `(SELECT ${k} FROM ${table} WHERE ${pkey} = $${pkey})`
+      }
     })
 
     const values = {}
-    fields.forEach((el) => {
-      values[`$${el}`] = data[el]
-    })
 
-    values[`$${selectKey}`] = selectValue
+    _.each(fields, k => {
+      values[`$${k}`] = data[k]
+    })
 
     return {
       query: `INSERT OR REPLACE INTO ${table} (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`,

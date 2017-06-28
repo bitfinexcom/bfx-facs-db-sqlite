@@ -39,8 +39,8 @@ describe('upsert', () => {
   it('builds nice queries', (done) => {
     const res = fac._buildUpsertQuery({
       table: 'Employees',
-      selectKey: 'id',
-      selectValue: '1',
+      pkey: 'id',
+      pval: '1',
       data: { id: 1, name: 'peter', surname: 'bitcoin' }
     })
 
@@ -81,8 +81,8 @@ describe('upsert', () => {
   it('upserts', (done) => {
     fac.upsert({
       table: 'Employees',
-      selectKey: 'id',
-      selectValue: '1',
+      pkey: 'id',
+      pval: '1',
       data: { id: 1, name: 'paolo', surname: 'ardoino' }
     }, cb)
 
@@ -101,16 +101,16 @@ describe('upsert', () => {
   it('supports controlled upserts: cupsert', (done) => {
     fac.upsert({
       table: 'Employees',
-      selectKey: 'id',
-      selectValue: '1',
+      pkey: 'id',
+      pval: '1',
       data: { id: 1, name: 'paolo', surname: 'ardoino' }
     }, next)
 
     function next () {
       fac.cupsert({
         table: 'Employees',
-        selectKey: 'id',
-        selectValue: '1',
+        pkey: 'id',
+        pval: '1',
         process: (data, cb) => {
           data[0].surname = 'diaz'
           cb(null, data[0])
