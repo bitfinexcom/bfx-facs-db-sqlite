@@ -1,5 +1,27 @@
 # bfx-facs-db-sqlite
 
+## API
+
+
+### fac.upsert
+
+Example:
+
+```
+fac.upsert({
+  table: 'Employees',
+  selectKey: 'id',
+  selectValue: '1',
+  data: { id: 1, name: 'paolo', surname: 'ardoino' }
+}, cb)
+
+// runs:
+d.run(
+  "INSERT OR REPLACE INTO Employees (id, name, surname) VALUES ((SELECT id FROM Employees WHERE id = $id),  $name,  $surname)",
+  { '$id': '1', '$name': 'peter', '$surname': 'bitcoin' }
+)
+```
+
 ## Config
 
 ### name

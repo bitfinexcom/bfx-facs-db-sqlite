@@ -36,6 +36,42 @@ class Sqlite extends Facility {
     ], cb)
   }
 
+  upsert (data, cb) {
+    const res = this._buildUpsertQuery(data)
+    this.db.run(res.query, res.data, cb)
+  }
+
+  _buildUpsertQuery ({ table, selectKey, selectValue, data }) {
+    if (!table || !selectKey || !selectValue || !data) {
+      console.error(
+        '_buildUpsertQuery missing argument:',
+        `${table}, ${selectKey}, ${selectValue}, ${data}`
+      )
+      console.trace()
+    }
+
+    const fields = Object.keys(data)
+    const placeholders = fields.map((el, i) => {
+      if (el === selectKey) {
+        return `(SELECT ${el} FROM ${table} WHERE ${selectKey} = $${selectKey})`
+      }
+
+      return ' ' + `$${el}`
+    })
+
+    const values = {}
+    fields.forEach((el) => {
+      values[`$${el}`] = data[el]
+    })
+
+    values[`$${selectKey}`] = selectValue
+
+    return {
+      query: `INSERT OR REPLACE INTO ${table} (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`,
+      data: values
+    }
+  }
+
   _maybeRunSqlAtStart (cb) {
     if (!this.opts.runSqlAtStart) return cb(null)
 

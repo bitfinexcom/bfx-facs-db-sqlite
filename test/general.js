@@ -24,17 +24,13 @@ describe('general', () => {
   it('returns an error if db directory does not exist', (done) => {
     const fac = new Fac(Fac, {
       db: path.join(__dirname, 'foo', 'funky', 'bar.db'),
-      dirConf: path.join(__dirname, 'fixtures'),
-      ensureTablesExist: [
-        'fruits',
-        'vegetables'
-      ]
+      dirConf: path.join(__dirname, 'fixtures')
     })
     fac._start(next)
 
     function next (err) {
       assert.ok(err instanceof Error)
-      done()
+      fac._stop(done)
     }
   })
 })
