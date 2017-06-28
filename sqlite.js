@@ -74,7 +74,7 @@ class Sqlite extends Facility {
     const fields = _.keys(data)
     
     const placeholders = _.map(fields, k => {
-      if (data[k]) {
+      if (!_.isUndefined(data[k])) {
         return `$${k}`
       } else {
         return `(SELECT ${k} FROM ${table} WHERE ${pkey} = $${pkey})`
