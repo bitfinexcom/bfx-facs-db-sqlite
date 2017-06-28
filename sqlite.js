@@ -41,6 +41,23 @@ class Sqlite extends Facility {
     this.db.run(res.query, res.data, cb)
   }
 
+  cupsert (opts, cb) {
+    const { table, selectKey, selectValue, process } = opts
+    const d = {}
+    d[`$${selectKey}`] = `${selectValue}`
+
+    this.db.all(
+      `SELECT * from ${table} WHERE ${selectKey} = $${selectKey}`,
+      d,
+      (err, res) => {
+        if (err) return cb(err)
+        process(res, (err, data) => {
+          if (err) return cb(err)
+          this.upsert({ table, selectKey, selectValue, data }, cb)
+        })
+      })
+  }
+
   _buildUpsertQuery ({ table, selectKey, selectValue, data }) {
     if (!table || !selectKey || !selectValue || !data) {
       console.error(
