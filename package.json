@@ -20,7 +20,9 @@
   },
   "main": "sqlite.js",
   "devDependencies": {
+    "mkdirp": "^0.5.1",
     "mocha": "^3.4.2",
+    "rimraf": "^2.6.1",
     "standard": "^10.0.2"
   },
   "scripts": {

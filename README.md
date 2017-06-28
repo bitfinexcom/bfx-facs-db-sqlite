@@ -10,6 +10,22 @@ Used to construct the database name: sqlite_$NAME_$LABEL.db
 
 Used to construct the database name: sqlite_$NAME_$LABEL.db
 
+### runSqlAtStart
+
+Runs SQLite commands at start of the service.
+Useful to create a table if it does not exist.
+Takes an array commands to run.
+
+**Example fields:**
+
+```
+{
+  "runSqlAtStart": [
+    'CREATE TABLE IF NOT EXISTS vegetables (id INTEGER PRIMARY KEY ASC, sold, price)',
+    'CREATE TABLE IF NOT EXISTS meat (id INTEGER PRIMARY KEY ASC, sold, price)'
+  ]
+}
+```
 
 ### Example
 
@@ -19,11 +35,14 @@ Used to construct the database name: sqlite_$NAME_$LABEL.db
 {
   "sqlite": {
     "name": "foo",
-    "label": "bar"
+    "label": "bar",
+    "runSqlAtStart": [
+      "CREATE TABLE IF NOT EXISTS vegetables (id INTEGER PRIMARY KEY ASC, sold, price)",
+      "CREATE TABLE IF NOT EXISTS meat (id INTEGER PRIMARY KEY ASC, sold, price)"
+    ]
   }
 }
 
-```
 
 ```
 git clone git@github.com:bitfinexcom/REPO.git REPO
