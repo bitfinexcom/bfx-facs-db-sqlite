@@ -1,7 +1,7 @@
 {
   "name": "bfx-facs-base",
   "version": "0.0.1",
-  "private": false,
+  "private": true,
   "description": "Bitfinex Facility",
   "author": {
     "name": "prdn",
@@ -18,31 +18,21 @@
   "engine": {
     "node": ">=6.0"
   },
-  "main": "index.js",
-  "directories": {
-    "example": "examples",
-    "test": "test"
-  },
+  "main": "sqlite.js",
   "devDependencies": {
-    "chai": "~3.2.0",
-    "mocha": "~2.2.5"
+    "mkdirp": "^0.5.1",
+    "mocha": "^3.4.2",
+    "rimraf": "^2.6.1",
+    "standard": "^10.0.2"
   },
   "scripts": {
-    "test": "make test"
+    "test": "npm run lint && npm run unit",
+    "unit": "mocha",
+    "lint": "standard"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitfinexcom/bfx-facs-base.git"
-  },
-  "bugs": {
-    "url": "https://github.com/bitfinexcom/bfx-facs-base/issues"
-  },
-  "homepage": "https://github.com/bitfinexcom/bfx-facs-base",
-  "maintainers": [
-    {
-      "name": "prdn",
-      "email": "paolo@bitfinex.com"
-    }
-  ]
+  }
 }

@@ -3,14 +3,18 @@
 const async = require('async')
 const SqliteDb = require('sqlite3')
 const Facility = require('./base')
-const path = require('path')
-const fs = require('fs')
+const _ = require('lodash')
 
 class Sqlite extends Facility {
   constructor (caller, opts, ctx) {
     super(caller, opts, ctx)
 
-    this.name = 'sqlite'
+    this.name = 'db-sqlite'
+    this._hasConf = true
+
+    this.opts = _.defaults({}, opts, this.opts, {
+      db: `${__dirname}/../../db/${this.name}_${this.opts.name}_${this.opts.label}.db`
+    })
 
     this.init()
   }
@@ -19,19 +23,41 @@ class Sqlite extends Facility {
     async.series([
       next => { super._start(next) },
       next => {
-        const db = `${__dirname}/../../db/${this.name}_${this.opts.name}_${this.opts.label}.db`
-        const dbDir = path.dirname(db)
-
-        if (!fs.existsSync(dbDir)) {
-          throw new Error(`directory ${dbDir} does not exist`)
-        }
+        const db = this.opts.db
 
         this.db = new SqliteDb.Database(
           db,
           next
         )
+      },
+      next => {
+        this._maybeRunSqlAtStart(next)
       }
     ], cb)
+  }
+
+  _maybeRunSqlAtStart (cb) {
+    if (!this.opts.runSqlAtStart) return cb(null)
+
+    const callLast = (() => {
+      let called = 0
+      return (limit, cb) => {
+        called++
+        if (called === limit) {
+          cb(null)
+        }
+      }
+    })()
+
+    this.db.serialize(() => {
+      this.opts.runSqlAtStart.forEach((q) => {
+        this.db.run(q, (err) => {
+          if (err) throw err
+
+          callLast(this.opts.runSqlAtStart.length, cb)
+        })
+      })
+    })
   }
 
   _stop (cb) {
@@ -40,8 +66,8 @@ class Sqlite extends Facility {
       next => {
         try {
           this.db.close()
-        } catch(e) {
-          console.error(err)
+        } catch (e) {
+          console.error(e)
         }
         delete this.db
         next()
