@@ -97,4 +97,36 @@ describe('upsert', () => {
       })
     }
   })
+
+  it('supports controlled upserts: cupsert', (done) => {
+    fac.upsert({
+      table: 'Employees',
+      selectKey: 'id',
+      selectValue: '1',
+      data: { id: 1, name: 'paolo', surname: 'ardoino' }
+    }, next)
+
+    function next () {
+      fac.cupsert({
+        table: 'Employees',
+        selectKey: 'id',
+        selectValue: '1',
+        process: (data, cb) => {
+          data[0].surname = 'diaz'
+          cb(null, data[0])
+        }
+      }, cb)
+
+      function cb () {
+        fac.db.get('SELECT id, surname, name FROM Employees WHERE id = $id', { $id: 1 }, (err, data) => {
+          if (err) throw err
+          assert.deepEqual(
+            data,
+            { id: 1, name: 'paolo', surname: 'diaz' }
+          )
+          done()
+        })
+      }
+    }
+  })
 })

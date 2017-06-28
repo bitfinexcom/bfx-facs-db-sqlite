@@ -7,7 +7,7 @@
 
 Example:
 
-```
+```js
 fac.upsert({
   table: 'Employees',
   selectKey: 'id',
@@ -20,6 +20,24 @@ d.run(
   "INSERT OR REPLACE INTO Employees (id, name, surname) VALUES ((SELECT id FROM Employees WHERE id = $id),  $name,  $surname)",
   { '$id': '1', '$name': 'peter', '$surname': 'bitcoin' }
 )
+```
+
+### fac.cupsert
+
+Provides a simple way to check and process data before an upsert.
+
+Example:
+
+```js
+fac.cupsert({
+  table: 'Employees',
+  selectKey: 'id',
+  selectValue: '1',
+  process: (data, cb) => {
+    data[0].surname = 'diaz'
+    cb(null, data[0])
+  }
+}, cb)
 ```
 
 ## Config
