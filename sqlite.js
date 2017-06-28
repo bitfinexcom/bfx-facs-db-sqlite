@@ -67,13 +67,13 @@ class Sqlite extends Facility {
       console.trace()
     }
 
-    const fields = Object.keys(data)
-    const placeholders = fields.map((el, i) => {
+    const fields = _.keys(data)
+    const placeholders = _.map((el, i) => {
       if (el === selectKey) {
         return `(SELECT ${el} FROM ${table} WHERE ${selectKey} = $${selectKey})`
       }
 
-      return ' ' + `$${el}`
+      return ` $${el}`
     })
 
     const values = {}
