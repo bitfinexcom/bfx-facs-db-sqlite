@@ -43,7 +43,7 @@ class Sqlite extends Facility {
 
   cupsert (opts, cb) {
     const { table, pkey, pval, process } = opts
-    
+
     const d = {}
     d[`$${pkey}`] = `${pval}`
 
@@ -52,7 +52,7 @@ class Sqlite extends Facility {
       d,
       (err, res) => {
         if (err) return cb(err)
-   
+
         process(res, (err, data) => {
           if (err) return cb(err)
           this.upsert({ table, pkey, pval, data }, cb)
@@ -72,7 +72,7 @@ class Sqlite extends Facility {
     data[pkey] = pval
 
     const fields = _.keys(data)
-    
+
     const placeholders = _.map(fields, k => {
       if (!_.isUndefined(data[k])) {
         return `$${k}`
