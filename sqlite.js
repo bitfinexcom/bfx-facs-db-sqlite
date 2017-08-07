@@ -47,7 +47,7 @@ class Sqlite extends Facility {
     const d = {}
     d[`$${pkey}`] = `${pval}`
 
-    this.db.all(
+    this.db.get(
       `SELECT * from ${table} WHERE ${pkey} = $${pkey}`,
       d,
       (err, res) => {
