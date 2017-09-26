@@ -4,6 +4,8 @@ const async = require('async')
 const SqliteDb = require('sqlite3')
 const Facility = require('./base')
 const _ = require('lodash')
+const path = require('path')
+const fs = require('fs')
 
 class Sqlite extends Facility {
   constructor (caller, opts, ctx) {
@@ -24,11 +26,21 @@ class Sqlite extends Facility {
       next => { super._start(next) },
       next => {
         const db = this.opts.db
+        const dbDir = path.dirname(db)
 
-        this.db = new SqliteDb.Database(
-          db,
-          next
-        )
+        fs.access(dbDir, fs.constants.W_OK, (err) => {
+          if (err && err.code === 'ENOENT') {
+            const msg = `the directory ${dbDir} does not exist, please create`
+            return next(new Error(msg))
+          } else if (err) {
+            return cb(err)
+          }
+
+          this.db = new SqliteDb.Database(
+            db,
+            next
+          )
+        })
       },
       next => {
         this._maybeRunSqlAtStart(next)
