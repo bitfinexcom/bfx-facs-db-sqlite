@@ -14,8 +14,10 @@ class Sqlite extends Facility {
     this.name = 'db-sqlite'
     this._hasConf = false
 
+    const cal = this.caller
+
     this.opts = _.defaults({}, opts, this.opts, {
-      db: `${__dirname}/../../db/${this.name}_${this.opts.name}_${this.opts.label}.db`
+      db: `${cal.ctx.root}/db/${this.name}_${this.opts.name}_${this.opts.label}.db`
     })
 
     this.init()
