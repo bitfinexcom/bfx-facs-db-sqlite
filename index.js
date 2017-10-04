@@ -1,13 +1,14 @@
 'use strict'
 
-const async = require('async')
-const SqliteDb = require('sqlite3')
-const Facility = require('./base')
 const _ = require('lodash')
 const path = require('path')
 const fs = require('fs')
+const async = require('async')
+const SqliteDb = require('sqlite3')
+const Base = require('bfx-facs-base')
 
-class Sqlite extends Facility {
+class Sqlite extends Base {
+
   constructor (caller, opts, ctx) {
     super(caller, opts, ctx)
 
