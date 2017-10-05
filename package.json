@@ -1,8 +1,8 @@
 {
-  "name": "bfx-facs-base",
+  "name": "bfx-facs-db-sqlite",
   "version": "0.0.1",
   "private": true,
-  "description": "Bitfinex Facility",
+  "description": "Bitfinex DB Sqlite Facility",
   "author": {
     "name": "prdn",
     "email": "paolo@bitfinex.com"
@@ -23,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitfinexcom/bfx-facs-api.git"
+    "url": "git+https://github.com/bitfinexcom/bfx-facs-db-sqlite.git"
   },
   "maintainers": [
     {
