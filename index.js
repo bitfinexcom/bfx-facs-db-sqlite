@@ -46,6 +46,10 @@ class Sqlite extends Base {
         })
       },
       next => {
+        this.db.configure('busyTimeout', this.opts.busyTimeout || 1000)
+        this.db.on('error', err => {
+          console.error('ERR_DB_SQLITE', err)
+        })
         this._maybeRunSqlAtStart(next)
       }
     ], cb)
