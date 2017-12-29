@@ -8,7 +8,6 @@ const SqliteDb = require('sqlite3')
 const Base = require('bfx-facs-base')
 
 class Sqlite extends Base {
-
   constructor (caller, opts, ctx) {
     super(caller, opts, ctx)
 
