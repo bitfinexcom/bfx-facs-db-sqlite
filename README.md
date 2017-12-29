@@ -42,21 +42,21 @@ fac.cupsert({
 
 ### fac.runMigrations
   - `migrations`: &lt;Array&gt;
+    - `inex 0..x`: &lt;Function&gt;
   - `cb`: &lt;Function&gt;
 
 Runs an array of functions (migrations).
 
-  Each function in the migrations array expects a this
-  facility and a callback `(dsm, cb)`.
+  Each function in the migrations array is passed the faculty instance and a callback.
 
 Assumptions:
  1.  `PRAGMA user_version` will be used to track migrations.  It is assumed to unused and will increment as an id for the index of the migrations array
- 1.  New migrations will always be added to the end of the migrations array and old migratoins shall never be deleted from the array.  The `PRAGMA user_version` will track which migrations in the migration array which have run and only run new migrations.
- 1.  Each migration is automatically wrapped in a TRANSACTION.   Migrations wll stop running on any error.
+ 1.  New migrations will always be added to the end of the migrations array and old migrations shall never be deleted from the array.  The `PRAGMA user_version` will track which migrations in the migration array which have run and only run new migrations.
+ 1.  Each migration is automatically wrapped in a TRANSACTION.   Migrations will stop running on any error.
 
 #### Example Migrations
 
-```
+```js
 # api.my.wrk.js
 ...
     this.conf.init.facilities.push(
