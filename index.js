@@ -166,7 +166,6 @@ class Sqlite extends Base {
   }
 
   _migrate (migration, cb) {
-
     this._migrationIndex += 1
 
     async.waterfall([
