@@ -17,6 +17,8 @@ beforeEach((done) => {
   rimraf.sync(tmpDir)
   mkdirp.sync(tmpDir)
 
+  Fac.ctx = { root: '' }
+
   fac = new Fac(Fac, {
     db: path.join(__dirname, 'tmp', 'test.db'),
     dirConf: path.join(__dirname, 'fixtures'),
@@ -112,8 +114,8 @@ describe('upsert', () => {
         pkey: 'id',
         pval: '1',
         process: (data, cb) => {
-          data[0].surname = 'diaz'
-          cb(null, data[0])
+          data.surname = 'diaz'
+          cb(null, data)
         }
       }, cb)
 

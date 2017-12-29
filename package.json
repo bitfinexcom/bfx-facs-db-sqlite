@@ -11,6 +11,11 @@
   "keywords": [
     "bitfinex"
   ],
+  "scripts": {
+    "test": "npm run lint && npm run unit",
+    "unit": "mocha",
+    "lint": "standard"
+  },
   "dependencies": {
     "async": "^2.5.0",
     "bfx-facs-base": "git+https://github.com/bitfinexcom/bfx-facs-base.git",
@@ -30,5 +35,11 @@
       "name": "prdn",
       "email": "paolo@bitfinex.com"
     }
-  ]
+  ],
+  "devDependencies": {
+    "mkdirp": "^0.5.1",
+    "mocha": "^4.1.0",
+    "rimraf": "^2.6.2",
+    "standard": "^10.0.3"
+  }
 }
