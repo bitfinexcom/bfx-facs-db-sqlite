@@ -40,6 +40,64 @@ fac.cupsert({
 }, cb)
 ```
 
+### fac.runMigrations
+  - `migrations`: &lt;Array&gt;
+    - `inex 0..x`: &lt;Function&gt;
+  - `cb`: &lt;Function&gt;
+
+Runs an array of functions (migrations).
+
+  Each function in the migrations array is passed the faculty instance and a callback.
+
+Assumptions:
+ 1.  `PRAGMA user_version` will be used to track migrations.  It is assumed to unused and will increment as an id for the index of the migrations array
+ 1.  New migrations will always be added to the end of the migrations array and old migrations shall never be deleted from the array.  The `PRAGMA user_version` will track which migrations in the migration array which have run and only run new migrations.
+ 1.  Each migration is automatically wrapped in a TRANSACTION.   Migrations will stop running on any error.
+
+#### Example Migrations
+
+```js
+# api.my.wrk.js
+...
+    this.conf.init.facilities.push(
+      ['fac', 'bfx-facs-db-sqlite', 'main', 'main', {
+        name: this.prefix,
+        presist: true,
+        runSqlAtStart: this.getDbSqliteInit()
+      }]
+    )
+  }
+
+  _start (cb) {
+    async.series([
+      next => { super._start(next) },
+      next => { this.dbSqlite_main.runMigrations(migrations, next) }
+    ], cb)
+  }
+
+  getDbSqliteInit () {
+    return [
+      // eslint-disable-next-line no-multi-str
+      'CREATE TABLE IF NOT EXISTS token_sales ( \
+    # ...
+}
+
+const migrations = [
+  (dsm, cb) => {
+    dsm.db.run('ALTER TABLE token_sales ADD COLUMN listed INTEGER;', cb)
+  },
+  (dsm, cb) => {
+    dsm.db.run('ALTER TABLE token_sales ADD COLUMN trading INTEGER;', cb)
+  },
+  (dsm, cb) => {
+    dsm.db.run('ALTER TABLE token_sales ADD COLUMN contribute_url TEXT;', cb)
+  },
+  (dsm, cb) => {
+    dsm.db.run('ALTER TABLE token_sales RENAME TO token_listing;', cb)
+  }
+]
+```
+
 ## Config
 
 ### name

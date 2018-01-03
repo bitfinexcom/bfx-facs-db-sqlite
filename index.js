@@ -20,6 +20,9 @@ class Sqlite extends Base {
       db: `${cal.ctx.root}/db/${this.name}_${this.opts.name}_${this.opts.label}.db`
     })
 
+    this._migrate = this._migrate.bind(this)
+    this.runMigrations = this.runMigrations.bind(this)
+
     this.init()
   }
 
@@ -146,6 +149,55 @@ class Sqlite extends Base {
         }
         delete this.db
         next()
+      }
+    ], cb)
+  }
+
+  runMigrations (migrations, cb) {
+    this._migrationIndex = 0
+
+    async.mapSeries(migrations, this._migrate, (err, results) => {
+      if (err) {
+        console.error(err)
+        return cb(err, results)
+      }
+      cb(null, results)
+    })
+  }
+
+  _migrate (migration, cb) {
+    this._migrationIndex += 1
+
+    async.waterfall([
+      (next) => {
+        this.db.all('PRAGMA user_version;', [], (err, rows) => {
+          if (err) {
+            console.error(err)
+            return next(err)
+          }
+          const userVersion = rows[0].user_version
+          if (this._migrationIndex <= userVersion) { return cb(null) }
+          next(null, userVersion)
+        })
+      },
+      (userVersion, next) => {
+        this.db.run('BEGIN TRANSACTION;', (err) => {
+          if (err) { return cb(err) }
+          next(null, userVersion)
+        })
+      },
+      (userVersion, next) => {
+        console.log('running migration', userVersion)
+        migration(this, (err) => {
+          if (err) { return cb(err) }
+          next(null, userVersion)
+        })
+      },
+      (userVersion, next) => {
+        this.db.run(`PRAGMA user_version=${userVersion + 1};`, next)
+      },
+      (next) => {
+        this.db.run('COMMIT;', next)
       }
     ], cb)
   }
