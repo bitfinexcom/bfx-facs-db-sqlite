@@ -170,7 +170,7 @@ class Sqlite extends Base {
 
     async.waterfall([
       (next) => {
-        this.db.all('PRAGMA user_version;', [], (err, rows) => {
+        this.db.all('PRAGMA user_version', [], (err, rows) => {
           if (err) {
             console.error(err)
             return next(err)
@@ -181,7 +181,7 @@ class Sqlite extends Base {
         })
       },
       (userVersion, next) => {
-        this.db.run('BEGIN TRANSACTION;', (err) => {
+        this.db.run('BEGIN TRANSACTION', (err) => {
           if (err) { return cb(err) }
           next(null, userVersion)
         })
@@ -194,12 +194,21 @@ class Sqlite extends Base {
         })
       },
       (userVersion, next) => {
-        this.db.run(`PRAGMA user_version=${userVersion + 1};`, next)
+        this.db.run(`PRAGMA user_version=${userVersion + 1}`, next)
       },
       (next) => {
-        this.db.run('COMMIT;', next)
+        this.db.run('COMMIT', next)
       }
-    ], cb)
+    ], (data, err) => {
+      if (err) {
+        this.db.run('ROLLBACK', (commitErr) => {
+          if (commitErr) { console.log('Error on rollback', commitErr) }
+          cb(err)
+        })
+      } else {
+        cb(data, err)
+      }
+    })
   }
 }
 
