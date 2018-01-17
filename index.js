@@ -166,6 +166,7 @@ class Sqlite extends Base {
   }
 
   _migrate (migration, cb) {
+    let inTransaction = true
     this._migrationIndex += 1
 
     async.waterfall([
@@ -182,6 +183,7 @@ class Sqlite extends Base {
       },
       (userVersion, next) => {
         this.db.run('BEGIN TRANSACTION', (err) => {
+          if (!err) { inTransaction = true }
           next(err, userVersion)
         })
       },
@@ -200,12 +202,16 @@ class Sqlite extends Base {
       }
     ], (err, data) => {
       if (err) {
-        console.log('running rollback', err)
-        this.db.run('ROLLBACK', function (commitErr) {
-          if (commitErr) { console.log('Error on rollback', commitErr) }
-          console.log('done running rollback', err)
+        if (inTransaction) {
+          console.log('running rollback', err)
+          this.db.run('ROLLBACK', (commitErr) => {
+            if (commitErr) { console.log('Error on rollback', commitErr) }
+            console.log('done running rollback', err)
+            cb(err)
+          })
+        } else {
           cb(err)
-        })
+        }
       } else {
         cb(err, data)
       }
