@@ -189,12 +189,15 @@ class Sqlite extends Base {
       },
       (userVersion, next) => {
         console.log('running migration', userVersion)
-        migration(this, (err) => {
-          next(err, userVersion)
-        })
+        try {
+          migration(this, (err) => {
+            next(err, userVersion)
+          })
+        } catch (e) {
+          next(e)
+        }
       },
       (userVersion, next) => {
-        console.log('i made it to next!')
         this.db.run(`PRAGMA user_version=${userVersion + 1}`, next)
       },
       (next) => {
@@ -203,10 +206,8 @@ class Sqlite extends Base {
     ], (err, data) => {
       if (err) {
         if (inTransaction) {
-          console.log('running rollback', err)
           this.db.run('ROLLBACK', (commitErr) => {
             if (commitErr) { console.log('Error on rollback', commitErr) }
-            console.log('done running rollback', err)
             cb(err)
           })
         } else {

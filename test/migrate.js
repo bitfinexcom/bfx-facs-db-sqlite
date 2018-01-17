@@ -34,6 +34,17 @@ const badMigrations = [
     dsm.db.run('ALTER TABLE Employees ADD COLUMN age INTEGER', cb)
   } ]
 
+const badMigrationsWithException = [
+  (dsm, cb) => {
+    dsm.db.run('ALTER TABLE Employees ADD COLUMN title STRING', cb)
+  },
+  (dsm, cb) => {
+    throw new Error('I am not expected')
+  },
+  (dsm, cb) => {
+    dsm.db.run('ALTER TABLE Employees ADD COLUMN age INTEGER', cb)
+  } ]
+
 let fac
 beforeEach((done) => {
   rimraf.sync(tmpDir)
@@ -194,6 +205,29 @@ describe('migrate', () => {
 
     function nextTest (err) {
       assert.equal(err.message, 'SQLITE_ERROR: no such table: Personael')
+      db.get('PRAGMA user_version', (err, data) => {
+        if (err) throw err
+        assert.deepEqual(data, { user_version: 1 })
+        done()
+      })
+    }
+  })
+
+  it('gracefully handles unexpected exceptions', (done) => {
+    const db = fac.db
+
+    db.get('PRAGMA user_version', (err, data) => {
+      if (err) throw err
+      assert.deepEqual(data, { user_version: 0 })
+      next()
+    })
+
+    function next () {
+      fac.runMigrations(badMigrationsWithException, nextTest)
+    }
+
+    function nextTest (err) {
+      assert.equal(err.message, 'I am not expected')
       db.get('PRAGMA user_version', (err, data) => {
         if (err) throw err
         assert.deepEqual(data, { user_version: 1 })
