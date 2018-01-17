@@ -193,7 +193,6 @@ describe('migrate', () => {
     }
 
     function nextTest (err) {
-      console.log('wtf', err.message)
       assert.equal(err.message, 'SQLITE_ERROR: no such table: Personael')
       db.get('PRAGMA user_version', (err, data) => {
         if (err) throw err

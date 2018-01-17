@@ -172,41 +172,42 @@ class Sqlite extends Base {
       (next) => {
         this.db.all('PRAGMA user_version', [], (err, rows) => {
           if (err) {
-            console.error(err)
-            return next(err)
+            next(err)
+          } else {
+            const userVersion = rows[0].user_version
+            if (this._migrationIndex <= userVersion) { return cb(null) }
+            next(null, userVersion)
           }
-          const userVersion = rows[0].user_version
-          if (this._migrationIndex <= userVersion) { return cb(null) }
-          next(null, userVersion)
         })
       },
       (userVersion, next) => {
         this.db.run('BEGIN TRANSACTION', (err) => {
-          if (err) { return cb(err) }
-          next(null, userVersion)
+          next(err, userVersion)
         })
       },
       (userVersion, next) => {
         console.log('running migration', userVersion)
         migration(this, (err) => {
-          if (err) { return cb(err) }
-          next(null, userVersion)
+          next(err, userVersion)
         })
       },
       (userVersion, next) => {
+        console.log('i made it to next!')
         this.db.run(`PRAGMA user_version=${userVersion + 1}`, next)
       },
       (next) => {
         this.db.run('COMMIT', next)
       }
-    ], (data, err) => {
+    ], (err, data) => {
       if (err) {
-        this.db.run('ROLLBACK', (commitErr) => {
+        console.log('running rollback', err)
+        this.db.run('ROLLBACK', function (commitErr) {
           if (commitErr) { console.log('Error on rollback', commitErr) }
+          console.log('done running rollback', err)
           cb(err)
         })
       } else {
-        cb(data, err)
+        cb(err, data)
       }
     })
   }
