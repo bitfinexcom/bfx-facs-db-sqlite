@@ -204,18 +204,16 @@ class Sqlite extends Base {
         this.db.run('COMMIT', next)
       }
     ], (err, data) => {
-      if (err) {
-        if (inTransaction) {
-          this.db.run('ROLLBACK', (commitErr) => {
-            if (commitErr) { console.log('Error on rollback', commitErr) }
-            cb(err)
-          })
-        } else {
+      if (!err) return cb(null, data)
+
+      if (err && inTransaction) {
+        this.db.run('ROLLBACK', (commitErr) => {
+          if (commitErr) { console.log('Error on rollback', commitErr) }
           cb(err)
-        }
-      } else {
-        cb(err, data)
+        })
+        return
       }
+      cb(err)
     })
   }
 }
