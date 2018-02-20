@@ -10,7 +10,7 @@ const rimraf = require('rimraf')
 
 const Fac = require('../')
 
-const tmpDir = path.join(__dirname, 'tmp2')
+const tmpDir = path.join(__dirname, 'tmp')
 
 const migrations = [
   (dsm, cb) => {
@@ -46,31 +46,31 @@ const badMigrationsWithException = [
   } ]
 
 let fac
-beforeEach((done) => {
-  rimraf.sync(tmpDir)
-  mkdirp.sync(tmpDir)
-
-  Fac.ctx = { root: '' }
-
-  fac = new Fac(Fac, {
-    db: path.join(__dirname, 'tmp2', 'test.db'),
-    dirConf: path.join(__dirname, 'fixtures'),
-    runSqlAtStart: [
-      'CREATE TABLE IF NOT EXISTS Employees (id INTEGER PRIMARY KEY ASC, name, surname)'
-    ]
-  })
-
-  fac._start(done)
-})
-
-afterEach((done) => {
-  fac._stop(() => {
-    rimraf.sync(tmpDir)
-    done()
-  })
-})
-
 describe('migrate', () => {
+  beforeEach((done) => {
+    rimraf.sync(tmpDir)
+    mkdirp.sync(tmpDir)
+
+    Fac.ctx = { root: '' }
+
+    fac = new Fac(Fac, {
+      db: path.join(__dirname, 'tmp', 'test.db'),
+      dirConf: path.join(__dirname, 'fixtures'),
+      runSqlAtStart: [
+        'CREATE TABLE IF NOT EXISTS Employees (id INTEGER PRIMARY KEY ASC, name, surname)'
+      ]
+    })
+
+    fac._start(done)
+  })
+
+  afterEach((done) => {
+    fac._stop(() => {
+      rimraf.sync(tmpDir)
+      done()
+    })
+  })
+
   it('runs an array of functions', (done) => {
     fac.runMigrations(migrations, next)
     const db = fac.db
