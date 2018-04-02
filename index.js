@@ -166,40 +166,55 @@ class Sqlite extends Base {
   }
 
   _migrate (migration, cb) {
+    let inTransaction = true
     this._migrationIndex += 1
 
     async.waterfall([
       (next) => {
-        this.db.all('PRAGMA user_version;', [], (err, rows) => {
+        this.db.all('PRAGMA user_version', [], (err, rows) => {
           if (err) {
-            console.error(err)
-            return next(err)
+            next(err)
+          } else {
+            const userVersion = rows[0].user_version
+            if (this._migrationIndex <= userVersion) { return cb(null) }
+            next(null, userVersion)
           }
-          const userVersion = rows[0].user_version
-          if (this._migrationIndex <= userVersion) { return cb(null) }
-          next(null, userVersion)
         })
       },
       (userVersion, next) => {
-        this.db.run('BEGIN TRANSACTION;', (err) => {
-          if (err) { return cb(err) }
-          next(null, userVersion)
+        this.db.run('BEGIN TRANSACTION', (err) => {
+          if (!err) { inTransaction = true }
+          next(err, userVersion)
         })
       },
       (userVersion, next) => {
         console.log('running migration', userVersion)
-        migration(this, (err) => {
-          if (err) { return cb(err) }
-          next(null, userVersion)
-        })
+        try {
+          migration(this, (err) => {
+            next(err, userVersion)
+          })
+        } catch (e) {
+          next(e)
+        }
       },
       (userVersion, next) => {
-        this.db.run(`PRAGMA user_version=${userVersion + 1};`, next)
+        this.db.run(`PRAGMA user_version=${userVersion + 1}`, next)
       },
       (next) => {
-        this.db.run('COMMIT;', next)
+        this.db.run('COMMIT', next)
       }
-    ], cb)
+    ], (err, data) => {
+      if (!err) return cb(null, data)
+
+      if (err && inTransaction) {
+        this.db.run('ROLLBACK', (commitErr) => {
+          if (commitErr) { console.log('Error on rollback', commitErr) }
+          cb(err)
+        })
+        return
+      }
+      cb(err)
+    })
   }
 }
 
