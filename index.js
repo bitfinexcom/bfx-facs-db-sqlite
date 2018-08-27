@@ -59,7 +59,10 @@ class Sqlite extends Base {
 
   upsert (data, cb) {
     const res = this._buildUpsertQuery(data)
-    this.db.run(res.query, res.data, cb)
+    this.db.run(res.query, res.data, function (err) {
+      if (err) return cb(err)
+      cb(null, {lastID: this.lastID})
+    })
   }
 
   cupsert (opts, cb) {
@@ -82,10 +85,10 @@ class Sqlite extends Base {
   }
 
   _buildUpsertQuery ({ table, pkey, pval, data }) {
-    if (!table || !pkey || !pval || !data) {
+    if (!table || !pkey || !data) {
       console.error(
         '_buildUpsertQuery missing argument:',
-        `${table}, ${pkey}, ${pval}, ${data}`
+        `${table}, ${pkey}, ${data}`
       )
       console.trace()
     }

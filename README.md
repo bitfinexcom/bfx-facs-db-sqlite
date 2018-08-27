@@ -5,6 +5,8 @@
 
 ### fac.upsert
 
+Returns { lastID: <lastID> } in the result cb
+
 Example:
 
 ```js

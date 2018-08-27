@@ -100,6 +100,28 @@ describe('upsert', () => {
     }
   })
 
+  it('upsert returns lastID', (done) => {
+    fac.upsert({
+      table: 'Employees',
+      pkey: 'id',
+      pval: null,
+      data: { name: 'paolo', surname: 'ardoino' }
+    }, cb)
+
+    function cb (err, res) {
+      if (err) throw err
+      fac.db.get('SELECT id, surname, name FROM Employees WHERE id = $id', { $id: res.lastID }, (err, data) => {
+        if (err) throw err
+        assert.deepEqual(res, { lastID: 1 })
+        assert.deepEqual(
+          data,
+          { id: res.lastID, name: 'paolo', surname: 'ardoino' }
+        )
+        done()
+      })
+    }
+  })
+
   it('supports controlled upserts: cupsert', (done) => {
     fac.upsert({
       table: 'Employees',
