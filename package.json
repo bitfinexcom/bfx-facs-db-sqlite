@@ -17,7 +17,7 @@
     "lint": "standard"
   },
   "dependencies": {
-    "async": "^2.6.0",
+    "async": "^2.6.1",
     "bfx-facs-base": "git+https://github.com/bitfinexcom/bfx-facs-base.git",
     "lodash": "^4.17.10",
     "sqlite3": "^4.0.1"
