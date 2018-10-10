@@ -79,7 +79,7 @@ describe('migrate', () => {
       if (err) throw err
       db.all('PRAGMA table_info(Employees)', (err, data) => {
         if (err) throw err
-        assert.deepEqual(
+        assert.deepStrictEqual(
           data,
           [ { cid: 0,
             name: 'id',
@@ -130,7 +130,7 @@ describe('migrate', () => {
 
     db.get('PRAGMA user_version', (err, data) => {
       if (err) throw err
-      assert.deepEqual(data, { user_version: 0 })
+      assert.deepStrictEqual(data, { user_version: 0 })
       next()
     })
 
@@ -142,7 +142,7 @@ describe('migrate', () => {
       if (err) throw err
       db.get('PRAGMA user_version', (err, data) => {
         if (err) throw err
-        assert.deepEqual(data, { user_version: 3 })
+        assert.deepStrictEqual(data, { user_version: 3 })
         done()
       })
     }
@@ -153,10 +153,10 @@ describe('migrate', () => {
     const db = fac.db
 
     function next (err) {
-      assert.equal(err.message, 'SQLITE_ERROR: no such table: Personael')
+      assert.strictEqual(err.message, 'SQLITE_ERROR: no such table: Personael')
       db.all('PRAGMA table_info(Employees)', (err, data) => {
         if (err) throw err
-        assert.deepEqual(
+        assert.deepStrictEqual(
           data,
           [ { cid: 0,
             name: 'id',
@@ -195,7 +195,7 @@ describe('migrate', () => {
 
     db.get('PRAGMA user_version', (err, data) => {
       if (err) throw err
-      assert.deepEqual(data, { user_version: 0 })
+      assert.deepStrictEqual(data, { user_version: 0 })
       next()
     })
 
@@ -204,10 +204,10 @@ describe('migrate', () => {
     }
 
     function nextTest (err) {
-      assert.equal(err.message, 'SQLITE_ERROR: no such table: Personael')
+      assert.strictEqual(err.message, 'SQLITE_ERROR: no such table: Personael')
       db.get('PRAGMA user_version', (err, data) => {
         if (err) throw err
-        assert.deepEqual(data, { user_version: 1 })
+        assert.deepStrictEqual(data, { user_version: 1 })
         done()
       })
     }
@@ -218,7 +218,7 @@ describe('migrate', () => {
 
     db.get('PRAGMA user_version', (err, data) => {
       if (err) throw err
-      assert.deepEqual(data, { user_version: 0 })
+      assert.deepStrictEqual(data, { user_version: 0 })
       next()
     })
 
@@ -227,10 +227,10 @@ describe('migrate', () => {
     }
 
     function nextTest (err) {
-      assert.equal(err.message, 'I am not expected')
+      assert.strictEqual(err.message, 'I am not expected')
       db.get('PRAGMA user_version', (err, data) => {
         if (err) throw err
-        assert.deepEqual(data, { user_version: 1 })
+        assert.deepStrictEqual(data, { user_version: 1 })
         done()
       })
     }
