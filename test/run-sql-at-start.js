@@ -37,7 +37,7 @@ describe('table option', () => {
       fac.db.serialize(() => {
         fac.db.all("select name from sqlite_master where type='table'", (err, tables) => {
           if (err) throw err
-          assert.deepEqual(
+          assert.deepStrictEqual(
             tables,
             [ { name: 'fruits' }, { name: 'shops' } ]
           )

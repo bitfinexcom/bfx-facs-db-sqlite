@@ -61,7 +61,7 @@ class Sqlite extends Base {
     const res = this._buildUpsertQuery(data)
     this.db.run(res.query, res.data, function (err) {
       if (err) return cb(err)
-      cb(null, {lastID: this.lastID})
+      cb(null, { lastID: this.lastID })
     })
   }
 

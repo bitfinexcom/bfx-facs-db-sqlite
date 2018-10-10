@@ -54,7 +54,7 @@ describe('upsert', () => {
       if (err) throw err
       db.get('SELECT * FROM Employees WHERE 1 = 1', (err, data) => {
         if (err) throw err
-        assert.deepEqual(
+        assert.deepStrictEqual(
           data,
           { id: 1, name: 'peter', surname: 'bitcoin' }
         )
@@ -70,7 +70,7 @@ describe('upsert', () => {
 
         db.get('SELECT id, surname, name FROM Employees WHERE id = $id', { $id: 1 }, (err, data) => {
           if (err) throw err
-          assert.deepEqual(
+          assert.deepStrictEqual(
             data,
             { id: 1, name: 'paolo', surname: 'ardoino' }
           )
@@ -91,7 +91,7 @@ describe('upsert', () => {
     function cb () {
       fac.db.get('SELECT id, surname, name FROM Employees WHERE id = $id', { $id: 1 }, (err, data) => {
         if (err) throw err
-        assert.deepEqual(
+        assert.deepStrictEqual(
           data,
           { id: 1, name: 'paolo', surname: 'ardoino' }
         )
@@ -112,8 +112,8 @@ describe('upsert', () => {
       if (err) throw err
       fac.db.get('SELECT id, surname, name FROM Employees WHERE id = $id', { $id: res.lastID }, (err, data) => {
         if (err) throw err
-        assert.deepEqual(res, { lastID: 1 })
-        assert.deepEqual(
+        assert.deepStrictEqual(res, { lastID: 1 })
+        assert.deepStrictEqual(
           data,
           { id: res.lastID, name: 'paolo', surname: 'ardoino' }
         )
@@ -144,7 +144,7 @@ describe('upsert', () => {
       function cb () {
         fac.db.get('SELECT id, surname, name FROM Employees WHERE id = $id', { $id: 1 }, (err, data) => {
           if (err) throw err
-          assert.deepEqual(
+          assert.deepStrictEqual(
             data,
             { id: 1, name: 'paolo', surname: 'diaz' }
           )
