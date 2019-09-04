@@ -5,7 +5,7 @@
 
 ### fac.upsert
 
-Returns { lastID: <lastID> } in the result cb
+Returns `{ lastID: <lastID> }` in the result
 
 Example:
 
@@ -59,45 +59,31 @@ Assumptions:
 #### Example Migrations
 
 ```js
-# api.my.wrk.js
-...
-    this.conf.init.facilities.push(
+// api.my.wrk.js
+  init () {
+    super.init()
+
+    this.setInitFacs([
       ['fac', 'bfx-facs-db-sqlite', 'main', 'main', {
         name: this.prefix,
-        presist: true,
-        runSqlAtStart: this.getDbSqliteInit()
+        persist: true
       }]
-    )
+    ])
+
   }
 
   _start (cb) {
+    const migrations = [
+      (dsm, cb) => {
+        dsm.db.run('ALTER TABLE token_sales ADD COLUMN listed INTEGER;', cb)
+      }
+    ]
+
     async.series([
       next => { super._start(next) },
       next => { this.dbSqlite_main.runMigrations(migrations, next) }
     ], cb)
   }
-
-  getDbSqliteInit () {
-    return [
-      // eslint-disable-next-line no-multi-str
-      'CREATE TABLE IF NOT EXISTS token_sales ( \
-    # ...
-}
-
-const migrations = [
-  (dsm, cb) => {
-    dsm.db.run('ALTER TABLE token_sales ADD COLUMN listed INTEGER;', cb)
-  },
-  (dsm, cb) => {
-    dsm.db.run('ALTER TABLE token_sales ADD COLUMN trading INTEGER;', cb)
-  },
-  (dsm, cb) => {
-    dsm.db.run('ALTER TABLE token_sales ADD COLUMN contribute_url TEXT;', cb)
-  },
-  (dsm, cb) => {
-    dsm.db.run('ALTER TABLE token_sales RENAME TO token_listing;', cb)
-  }
-]
 ```
 
 ## Config
@@ -142,12 +128,4 @@ Takes an array commands to run.
     ]
   }
 }
-
-
-```
-git clone git@github.com:bitfinexcom/REPO.git REPO
-git remote -v
-git remote add upstream git@github.com:bitfinexcom/PARENT.git
-git remote -v
-git push origin master
 ```
