@@ -112,20 +112,3 @@ Takes an array commands to run.
   ]
 }
 ```
-
-### Example
-
-**db-sqlite.config.json**
-
-```json
-{
-  "sqlite": {
-    "name": "foo",
-    "label": "bar",
-    "runSqlAtStart": [
-      "CREATE TABLE IF NOT EXISTS vegetables (id INTEGER PRIMARY KEY ASC, sold, price)",
-      "CREATE TABLE IF NOT EXISTS meat (id INTEGER PRIMARY KEY ASC, sold, price)"
-    ]
-  }
-}
-```
