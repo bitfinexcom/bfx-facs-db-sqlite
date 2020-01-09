@@ -21,7 +21,7 @@ const migrations = [
   },
   (dsm, cb) => {
     dsm.db.run('ALTER TABLE Employees ADD COLUMN age INTEGER', cb)
-  } ]
+  }]
 
 const badMigrations = [
   (dsm, cb) => {
@@ -32,7 +32,7 @@ const badMigrations = [
   },
   (dsm, cb) => {
     dsm.db.run('ALTER TABLE Employees ADD COLUMN age INTEGER', cb)
-  } ]
+  }]
 
 const badMigrationsWithException = [
   (dsm, cb) => {
@@ -43,7 +43,7 @@ const badMigrationsWithException = [
   },
   (dsm, cb) => {
     dsm.db.run('ALTER TABLE Employees ADD COLUMN age INTEGER', cb)
-  } ]
+  }]
 
 let fac
 describe('migrate', () => {
@@ -81,42 +81,54 @@ describe('migrate', () => {
         if (err) throw err
         assert.deepStrictEqual(
           data,
-          [ { cid: 0,
+          [{
+            cid: 0,
             name: 'id',
             type: 'INTEGER',
             notnull: 0,
             dflt_value: null,
-            pk: 1 },
-          { cid: 1,
+            pk: 1
+          },
+          {
+            cid: 1,
             name: 'name',
             type: '',
             notnull: 0,
             dflt_value: null,
-            pk: 0 },
-          { cid: 2,
+            pk: 0
+          },
+          {
+            cid: 2,
             name: 'surname',
             type: '',
             notnull: 0,
             dflt_value: null,
-            pk: 0 },
-          { cid: 3,
+            pk: 0
+          },
+          {
+            cid: 3,
             name: 'title',
             type: 'STRING',
             notnull: 0,
             dflt_value: null,
-            pk: 0 },
-          { cid: 4,
+            pk: 0
+          },
+          {
+            cid: 4,
             name: 'gender',
             type: 'STRING',
             notnull: 0,
             dflt_value: null,
-            pk: 0 },
-          { cid: 5,
+            pk: 0
+          },
+          {
+            cid: 5,
             name: 'age',
             type: 'INTEGER',
             notnull: 0,
             dflt_value: null,
-            pk: 0 } ])
+            pk: 0
+          }])
         nextTest()
       })
     }
@@ -158,30 +170,38 @@ describe('migrate', () => {
         if (err) throw err
         assert.deepStrictEqual(
           data,
-          [ { cid: 0,
+          [{
+            cid: 0,
             name: 'id',
             type: 'INTEGER',
             notnull: 0,
             dflt_value: null,
-            pk: 1 },
-          { cid: 1,
+            pk: 1
+          },
+          {
+            cid: 1,
             name: 'name',
             type: '',
             notnull: 0,
             dflt_value: null,
-            pk: 0 },
-          { cid: 2,
+            pk: 0
+          },
+          {
+            cid: 2,
             name: 'surname',
             type: '',
             notnull: 0,
             dflt_value: null,
-            pk: 0 },
-          { cid: 3,
+            pk: 0
+          },
+          {
+            cid: 3,
             name: 'title',
             type: 'STRING',
             notnull: 0,
             dflt_value: null,
-            pk: 0 } ])
+            pk: 0
+          }])
         nextTest()
       })
     }

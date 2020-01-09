@@ -39,7 +39,7 @@ describe('table option', () => {
           if (err) throw err
           assert.deepStrictEqual(
             tables,
-            [ { name: 'fruits' }, { name: 'shops' } ]
+            [{ name: 'fruits' }, { name: 'shops' }]
           )
           fac.db.close()
           done()
