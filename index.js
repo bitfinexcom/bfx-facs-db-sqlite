@@ -21,7 +21,10 @@ class Sqlite extends Base {
       label
     } = this.opts
     const baseName = `${this.name}_${this.opts.name}_${label}.db`
-    const db = path.isAbsolute(dbFolder)
+    const db = (
+      typeof dbFolder === 'string' &&
+      path.isAbsolute(dbFolder)
+    )
       ? path.join(dbFolder, baseName)
       : path.join(cal.ctx.root, 'db', baseName)
     this.opts = _.defaults({}, opts, this.opts, { db })
