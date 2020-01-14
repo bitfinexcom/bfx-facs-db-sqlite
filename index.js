@@ -17,15 +17,15 @@ class Sqlite extends Base {
     const cal = this.caller
 
     const {
-      dbFolder,
+      dbPathAbsolute,
       label
     } = this.opts
     const baseName = `${this.name}_${this.opts.name}_${label}.db`
     const db = (
-      typeof dbFolder === 'string' &&
-      path.isAbsolute(dbFolder)
+      typeof dbPathAbsolute === 'string' &&
+      path.isAbsolute(dbPathAbsolute)
     )
-      ? path.join(dbFolder, baseName)
+      ? path.join(dbPathAbsolute, baseName)
       : path.join(cal.ctx.root, 'db', baseName)
     this.opts = _.defaults({}, opts, this.opts, { db })
 
