@@ -16,9 +16,18 @@ class Sqlite extends Base {
 
     const cal = this.caller
 
-    this.opts = _.defaults({}, opts, this.opts, {
-      db: `${cal.ctx.root}/db/${this.name}_${this.opts.name}_${this.opts.label}.db`
-    })
+    const {
+      dbPathAbsolute,
+      label
+    } = this.opts
+    const baseName = `${this.name}_${this.opts.name}_${label}.db`
+    const db = (
+      typeof dbPathAbsolute === 'string' &&
+      path.isAbsolute(dbPathAbsolute)
+    )
+      ? path.join(dbPathAbsolute, baseName)
+      : path.join(cal.ctx.root, 'db', baseName)
+    this.opts = _.defaults({}, opts, this.opts, { db })
 
     this._migrate = this._migrate.bind(this)
     this.runMigrations = this.runMigrations.bind(this)
