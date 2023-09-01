@@ -7,6 +7,7 @@ const path = require('path')
 
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
+const { facCaller } = require('./helper')
 
 const Fac = require('../')
 
@@ -23,7 +24,7 @@ afterEach(() => {
 
 describe('table option', () => {
   it('creates tables if they do not exist', (done) => {
-    const fac = new Fac(Fac, {
+    const fac = new Fac(facCaller, {
       db: path.join(__dirname, 'tmp', 'test2.db'),
       dirConf: path.join(__dirname, 'fixtures'),
       runSqlAtStart: [

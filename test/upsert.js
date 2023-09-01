@@ -7,6 +7,7 @@ const path = require('path')
 
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
+const { facCaller } = require('./helper')
 
 const Fac = require('../')
 
@@ -19,7 +20,7 @@ beforeEach((done) => {
 
   Fac.ctx = { root: '' }
 
-  fac = new Fac(Fac, {
+  fac = new Fac(facCaller, {
     db: path.join(__dirname, 'tmp', 'test.db'),
     dirConf: path.join(__dirname, 'fixtures'),
     runSqlAtStart: [
