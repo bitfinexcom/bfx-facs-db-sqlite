@@ -6,6 +6,7 @@ const fs = require('fs')
 const async = require('async')
 const SqliteDb = require('sqlite3')
 const Base = require('bfx-facs-base')
+const {promisify} = require('util')
 
 class Sqlite extends Base {
   constructor (caller, opts, ctx) {
@@ -41,7 +42,6 @@ class Sqlite extends Base {
       next => {
         const db = this.opts.db
         const dbDir = path.dirname(db)
-
         fs.access(dbDir, fs.constants.W_OK, (err) => {
           if (err && err.code === 'ENOENT') {
             const msg = `the directory ${dbDir} does not exist, please create`
@@ -66,12 +66,28 @@ class Sqlite extends Base {
     ], cb)
   }
 
-  upsert (data, cb) {
-    const res = this._buildUpsertQuery(data)
-    this.db.run(res.query, res.data, function (err) {
-      if (err) return cb(err)
-      cb(null, { lastID: this.lastID })
+  async runAsync(sql, params=[]){
+    return new Promise((resolve,reject)=>{
+      return this.db.run(sql, params, function(err,res){ // passing an arrow function won't work
+        if(err) return reject(err)
+        return resolve(this)
+      })
     })
+  }
+
+  async allAsync(sql, params, ...rest){
+    return promisify(this.db.all.bind(this.db))(sql,params, ...rest)
+  }
+
+  async getAsync(sql, params, ...rest){
+    return promisify(this.db.get.bind(this.db))(sql, params, ...rest)
+  }
+
+  async upsert (data, cb) {
+    const res = this._buildUpsertQuery(data)
+    console.debug(this.db)
+    if(!cb) return this.runAsync(res.query, res.data)
+    return this.runAsync(res.query, res.data).then(cb).catch(cb)
   }
 
   cupsert (opts, cb) {
