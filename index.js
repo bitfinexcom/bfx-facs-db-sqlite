@@ -47,14 +47,34 @@ class Sqlite extends Base {
             if (err && err.code === 'ENOENT') {
               const msg = `the directory ${dbDir} does not exist, please create`
               return next(new Error(msg))
-            } else if (err) {
+            }
+            if (err) {
               return next(err)
             }
 
             return next()
           }),
-          (next) => fs.open(db, 'w', (err, fd) => next(err, fd)),
-          (fd, next) => fs.close(fd, (err) => next(err)),
+          (next) => fs.access(db, fs.constants.W_OK, (err) => {
+            if (err && err.code === 'ENOENT') {
+              return next(null, true)
+            }
+            if (err) {
+              return next(err)
+            }
+            return next(null, false)
+          }),
+          (open, next) => {
+            if (!open) {
+              return next(null, false)
+            }
+            fs.open(db, 'w', (err, fd) => next(err, fd))
+          },
+          (fd, next) => {
+            if (!fd) {
+              return next()
+            }
+            fs.close(fd, (err) => next(err))
+          },
           (next) => {
             this.db = new SqliteDb.Database(db, next)
           }
