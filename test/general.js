@@ -7,6 +7,7 @@ const path = require('path')
 
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
+const { facCaller } = require('./helper')
 
 const Fac = require('../')
 
@@ -22,7 +23,7 @@ afterEach(() => {
 
 describe('general', () => {
   it('returns an error if db directory does not exist', (done) => {
-    const fac = new Fac(Fac, {
+    const fac = new Fac(facCaller, {
       db: path.join(__dirname, 'foo', 'funky', 'bar.db'),
       dirConf: path.join(__dirname, 'fixtures')
     })
