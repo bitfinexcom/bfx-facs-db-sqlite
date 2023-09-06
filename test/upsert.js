@@ -41,7 +41,7 @@ afterEach((done) => {
 })
 
 describe('upsert', () => {
-  it('upsert should return awaitable results if no callback is supplied', async () => {
+  it('upsertAsync should return awaitable results', async () => {
     const opts = {
       table: 'Employees',
       pkey: 'id',
@@ -51,8 +51,27 @@ describe('upsert', () => {
         surname: crypto.randomBytes(16).toString('hex')
       }
     }
-    await fac.upsert(opts)
-    const employee = await fac.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
+    await fac.upsertAsync(opts)
+    const employee = await fac.db.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
+    assert.deepStrictEqual(employee, { id: opts.pval, ...opts.data })
+  })
+
+  it('cupsertAsync should return awaitable results', async () => {
+    const opts = {
+      table: 'Employees',
+      pkey: 'id',
+      pval: _.random(1, false),
+      data: {
+        name: crypto.randomBytes(16).toString('hex'),
+        surname: crypto.randomBytes(16).toString('hex')
+      },
+      process: async (d) => {
+        return Promise.resolve(d)
+      }
+    }
+    await fac.runAsync('INSERT INTO Employees(id, name, surname) VALUES(?, ?, ?)', [opts.pval, opts.data.name, opts.data.surname])
+    await fac.cupsertAsync(opts)
+    const employee = await fac.db.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
     assert.deepStrictEqual(employee, { id: opts.pval, ...opts.data })
   })
 

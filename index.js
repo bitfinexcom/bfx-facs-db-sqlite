@@ -87,6 +87,13 @@ class Sqlite extends Base {
           console.error('ERR_DB_SQLITE', err)
         })
         this._maybeRunSqlAtStart(next)
+      },
+      next => {
+        this.db.allAsync = promisify(this.db.all.bind(this.db))
+        this.db.getAsync = promisify(this.db.get.bind(this.db))
+        this.db.runAsync = this.runAsync.bind(this)
+        this.db.execAsync = promisify(this.db.exec.bind(this.db))
+        next()
       }
     ], cb)
   }
@@ -100,21 +107,20 @@ class Sqlite extends Base {
     })
   }
 
-  async allAsync (sql, params, ...rest) {
-    return promisify(this.db.all.bind(this.db))(sql, params, ...rest)
-  }
-
-  async getAsync (sql, params, ...rest) {
-    return promisify(this.db.get.bind(this.db))(sql, params, ...rest)
-  }
-
-  async upsert (data, cb) {
+  async upsertAsync (data) {
     const { query, data: params } = this._buildUpsertQuery(data)
-    const res = this.runAsync(query, params)
-    if (!cb) return res
-    return res.then(({ lastID }) => {
-      cb(null, { lastID })
-    }).catch(cb)
+    return new Promise((resolve, reject) => {
+      this.db.run(query, params, function (err) {
+        return err ? reject(err) : resolve(null, { lastID: this.lastID })
+      })
+    })
+  }
+
+  upsert (data, cb) {
+    const { query, data: params } = this._buildUpsertQuery(data)
+    return this.db.run(query, params, function (err) {
+      return err ? cb(err) : cb(err, { lastID: this.lastID })
+    })
   }
 
   cupsert (opts, cb) {
@@ -134,6 +140,17 @@ class Sqlite extends Base {
           this.upsert({ table, pkey, pval, data }, cb)
         })
       })
+  }
+
+  async cupsertAsync (opts) {
+    const { table, pkey, pval, process } = opts
+
+    const d = {}
+    d[`$${pkey}`] = `${pval}`
+
+    const getRes = await this.db.getAsync(`SELECT * from ${table} WHERE ${pkey} = $${pkey}`, d)
+    const data = await process(getRes)
+    return this.upsertAsync({ table, pkey, pval, data })
   }
 
   _buildUpsertQuery ({ table, pkey, pval, data }) {
