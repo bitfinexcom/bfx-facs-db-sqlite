@@ -7,8 +7,11 @@ const path = require('path')
 
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
+const { facCaller } = require('./helper')
 
 const Fac = require('../')
+const _ = require('lodash')
+const crypto = require('crypto')
 
 const tmpDir = path.join(__dirname, 'tmp')
 
@@ -19,7 +22,7 @@ beforeEach((done) => {
 
   Fac.ctx = { root: '' }
 
-  fac = new Fac(Fac, {
+  fac = new Fac(facCaller, {
     db: path.join(__dirname, 'tmp', 'test.db'),
     dirConf: path.join(__dirname, 'fixtures'),
     runSqlAtStart: [
@@ -38,6 +41,21 @@ afterEach((done) => {
 })
 
 describe('upsert', () => {
+  it('upsert should return awaitable results if no callback is supplied', async () => {
+    const opts = {
+      table: 'Employees',
+      pkey: 'id',
+      pval: _.random(1, false),
+      data: {
+        name: crypto.randomBytes(16).toString('hex'),
+        surname: crypto.randomBytes(16).toString('hex')
+      }
+    }
+    await fac.upsert(opts)
+    const employee = await fac.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
+    assert.deepStrictEqual(employee, { id: opts.pval, ...opts.data })
+  })
+
   it('builds nice queries', (done) => {
     const res = fac._buildUpsertQuery({
       table: 'Employees',

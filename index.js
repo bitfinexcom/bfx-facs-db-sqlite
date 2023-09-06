@@ -6,7 +6,7 @@ const fs = require('fs')
 const async = require('async')
 const SqliteDb = require('sqlite3')
 const Base = require('bfx-facs-base')
-const {promisify} = require('util')
+const { promisify } = require('util')
 
 class Sqlite extends Base {
   constructor (caller, opts, ctx) {
@@ -42,19 +42,44 @@ class Sqlite extends Base {
       next => {
         const db = this.opts.db
         const dbDir = path.dirname(db)
-        fs.access(dbDir, fs.constants.W_OK, (err) => {
-          if (err && err.code === 'ENOENT') {
-            const msg = `the directory ${dbDir} does not exist, please create`
-            return next(new Error(msg))
-          } else if (err) {
-            return cb(err)
-          }
 
-          this.db = new SqliteDb.Database(
-            db,
-            next
-          )
-        })
+        async.waterfall([
+          (next) => fs.access(dbDir, fs.constants.W_OK, (err) => {
+            if (err && err.code === 'ENOENT') {
+              const msg = `the directory ${dbDir} does not exist, please create`
+              return next(new Error(msg))
+            }
+            if (err) {
+              return next(err)
+            }
+
+            return next()
+          }),
+          (next) => fs.access(db, fs.constants.W_OK, (err) => {
+            if (err && err.code === 'ENOENT') {
+              return next(null, true)
+            }
+            if (err) {
+              return next(err)
+            }
+            return next(null, false)
+          }),
+          (open, next) => {
+            if (!open) {
+              return next(null, false)
+            }
+            fs.open(db, 'w', (err, fd) => next(err, fd))
+          },
+          (fd, next) => {
+            if (!fd) {
+              return next()
+            }
+            fs.close(fd, (err) => next(err))
+          },
+          (next) => {
+            this.db = new SqliteDb.Database(db, next)
+          }
+        ], next)
       },
       next => {
         this.db.configure('busyTimeout', this.opts.busyTimeout || 1000)
@@ -66,28 +91,30 @@ class Sqlite extends Base {
     ], cb)
   }
 
-  async runAsync(sql, params=[]){
-    return new Promise((resolve,reject)=>{
-      return this.db.run(sql, params, function(err,res){ // passing an arrow function won't work
-        if(err) return reject(err)
+  async runAsync (sql, params = []) {
+    return new Promise((resolve, reject) => {
+      return this.db.run(sql, params, function (err, res) { // passing an arrow function won't work
+        if (err) return reject(err)
         return resolve(this)
       })
     })
   }
 
-  async allAsync(sql, params, ...rest){
-    return promisify(this.db.all.bind(this.db))(sql,params, ...rest)
+  async allAsync (sql, params, ...rest) {
+    return promisify(this.db.all.bind(this.db))(sql, params, ...rest)
   }
 
-  async getAsync(sql, params, ...rest){
+  async getAsync (sql, params, ...rest) {
     return promisify(this.db.get.bind(this.db))(sql, params, ...rest)
   }
 
   async upsert (data, cb) {
-    const res = this._buildUpsertQuery(data)
-    console.debug(this.db)
-    if(!cb) return this.runAsync(res.query, res.data)
-    return this.runAsync(res.query, res.data).then(cb).catch(cb)
+    const { query, data: params } = this._buildUpsertQuery(data)
+    const res = this.runAsync(query, params)
+    if (!cb) return res
+    return res.then(({ lastID }) => {
+      cb(null, { lastID })
+    }).catch(cb)
   }
 
   cupsert (opts, cb) {
@@ -170,13 +197,18 @@ class Sqlite extends Base {
     async.series([
       next => { super._stop(next) },
       next => {
-        try {
-          this.db.close()
-        } catch (e) {
-          console.error(e)
+        if (!this.db) {
+          return next()
         }
-        delete this.db
-        next()
+
+        this.db.close((err) => {
+          if (err) {
+            console.error(err)
+          }
+
+          delete this.db
+          return next()
+        })
       }
     ], cb)
   }
