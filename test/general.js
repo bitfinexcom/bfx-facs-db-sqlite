@@ -58,18 +58,18 @@ describe('general', () => {
 
   it('allAsync should return an awaitable results', async () => {
     const num = crypto.randomBytes(16).toString('hex')
-    const res = await sqliteFac.db.allAsync('SELECT ? as num;', [num])
+    const res = await sqliteFac.allAsync('SELECT ? as num;', [num])
     assert.deepStrictEqual(res, [{ num }])
   })
 
   it('getAsync should return awaitable results', async () => {
     const num = crypto.randomBytes(16).toString('hex')
-    const res = await sqliteFac.db.getAsync('SELECT ? as num;', [num])
+    const res = await sqliteFac.getAsync('SELECT ? as num;', [num])
     assert.deepStrictEqual(res, { num })
   })
 
   it('execAsync should reutrn awaitable results', async () => {
-    const res = sqliteFac.db.execAsync('SELECT 1;')
+    const res = sqliteFac.execAsync('SELECT 1;')
     assert.ok(res instanceof Promise)
   })
 })

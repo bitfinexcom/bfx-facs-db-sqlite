@@ -52,7 +52,7 @@ describe('upsert', () => {
       }
     }
     await fac.upsertAsync(opts)
-    const employee = await fac.db.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
+    const employee = await fac.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
     assert.deepStrictEqual(employee, { id: opts.pval, ...opts.data })
   })
 
@@ -71,7 +71,7 @@ describe('upsert', () => {
     }
     await fac.runAsync('INSERT INTO Employees(id, name, surname) VALUES(?, ?, ?)', [opts.pval, opts.data.name, opts.data.surname])
     await fac.cupsertAsync(opts)
-    const employee = await fac.db.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
+    const employee = await fac.getAsync('SELECT * FROM Employees where id=?', [opts.pval])
     assert.deepStrictEqual(employee, { id: opts.pval, ...opts.data })
   })
 

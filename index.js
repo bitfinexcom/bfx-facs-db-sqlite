@@ -89,10 +89,9 @@ class Sqlite extends Base {
         this._maybeRunSqlAtStart(next)
       },
       next => {
-        this.db.allAsync = promisify(this.db.all.bind(this.db))
-        this.db.getAsync = promisify(this.db.get.bind(this.db))
-        this.db.runAsync = this.runAsync.bind(this)
-        this.db.execAsync = promisify(this.db.exec.bind(this.db))
+        this.allAsync = promisify(this.db.all.bind(this.db))
+        this.getAsync = promisify(this.db.get.bind(this.db))
+        this.execAsync = promisify(this.db.exec.bind(this.db))
         next()
       }
     ], cb)
@@ -148,7 +147,7 @@ class Sqlite extends Base {
     const d = {}
     d[`$${pkey}`] = `${pval}`
 
-    const getRes = await this.db.getAsync(`SELECT * from ${table} WHERE ${pkey} = $${pkey}`, d)
+    const getRes = await this.getAsync(`SELECT * from ${table} WHERE ${pkey} = $${pkey}`, d)
     const data = await process(getRes)
     return this.upsertAsync({ table, pkey, pval, data })
   }
