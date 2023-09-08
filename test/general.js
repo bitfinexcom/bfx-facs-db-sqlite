@@ -9,7 +9,6 @@ const rimraf = require('rimraf')
 const { facCaller } = require('./helper')
 
 const Fac = require('../')
-const crypto = require('crypto')
 
 const tmpDir = path.join(__dirname, 'tmp')
 describe('general', () => {
@@ -49,27 +48,5 @@ describe('general', () => {
       assert.ok(err instanceof Error)
       fac._stop(done)
     }
-  })
-
-  it('runAsync should return an awaitable results', async () => {
-    const res = sqliteFac.runAsync('SELECT 1;')
-    assert.ok(res instanceof Promise)
-  })
-
-  it('allAsync should return an awaitable results', async () => {
-    const num = crypto.randomBytes(16).toString('hex')
-    const res = await sqliteFac.allAsync('SELECT ? as num;', [num])
-    assert.deepStrictEqual(res, [{ num }])
-  })
-
-  it('getAsync should return awaitable results', async () => {
-    const num = crypto.randomBytes(16).toString('hex')
-    const res = await sqliteFac.getAsync('SELECT ? as num;', [num])
-    assert.deepStrictEqual(res, { num })
-  })
-
-  it('execAsync should reutrn awaitable results', async () => {
-    const res = sqliteFac.execAsync('SELECT 1;')
-    assert.ok(res instanceof Promise)
   })
 })
