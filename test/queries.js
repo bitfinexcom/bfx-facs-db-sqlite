@@ -19,31 +19,32 @@ const tmpDir = path.join(__dirname, 'tmp')
 
 let fac
 const chance = new Chance()
-beforeEach((done) => {
-  rimraf.sync(tmpDir)
-  mkdirp.sync(tmpDir)
-
-  Fac.ctx = { root: '' }
-
-  fac = new Fac(facCaller, {
-    db: path.join(__dirname, 'tmp', 'test.db'),
-    dirConf: path.join(__dirname, 'fixtures'),
-    runSqlAtStart: [
-      'CREATE TABLE IF NOT EXISTS Employees (id INTEGER PRIMARY KEY ASC, name, surname)'
-    ]
-  })
-
-  fac._start(done)
-})
-
-afterEach((done) => {
-  fac._stop(() => {
-    rimraf.sync(tmpDir)
-    done()
-  })
-})
 
 describe('queries', () => {
+  beforeEach((done) => {
+    rimraf.sync(tmpDir)
+    mkdirp.sync(tmpDir)
+
+    Fac.ctx = { root: '' }
+
+    fac = new Fac(facCaller, {
+      db: path.join(__dirname, 'tmp', 'test.db'),
+      dirConf: path.join(__dirname, 'fixtures'),
+      runSqlAtStart: [
+        'CREATE TABLE IF NOT EXISTS Employees (id INTEGER PRIMARY KEY ASC, name, surname)'
+      ]
+    })
+
+    fac._start(done)
+  })
+
+  afterEach((done) => {
+    fac._stop(() => {
+      rimraf.sync(tmpDir)
+      done()
+    })
+  })
+
   describe('async queries', () => {
     beforeEach(cb => {
       fac.db.exec('DELETE FROM Employees where 1', cb)

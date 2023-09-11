@@ -118,7 +118,7 @@ class Sqlite extends Base {
   upsert (data, cb) {
     const { query, data: params } = this._buildUpsertQuery(data)
     return this.db.run(query, params, function (err) {
-      return err ? cb(err) : cb(err, { lastID: this.lastID })
+      return err ? cb(err) : cb(null, { lastID: this.lastID })
     })
   }
 
