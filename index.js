@@ -6,6 +6,7 @@ const fs = require('fs')
 const async = require('async')
 const SqliteDb = require('sqlite3')
 const Base = require('bfx-facs-base')
+const { promisify } = require('util')
 
 class Sqlite extends Base {
   constructor (caller, opts, ctx) {
@@ -86,15 +87,38 @@ class Sqlite extends Base {
           console.error('ERR_DB_SQLITE', err)
         })
         this._maybeRunSqlAtStart(next)
+      },
+      next => {
+        this.allAsync = promisify(this.db.all.bind(this.db))
+        this.getAsync = promisify(this.db.get.bind(this.db))
+        this.execAsync = promisify(this.db.exec.bind(this.db))
+        next()
       }
     ], cb)
   }
 
+  async runAsync (sql, params = []) {
+    return new Promise((resolve, reject) => {
+      return this.db.run(sql, params, function (err, res) { // passing an arrow function won't work
+        if (err) return reject(err)
+        return resolve(this)
+      })
+    })
+  }
+
+  async upsertAsync (data) {
+    const { query, data: params } = this._buildUpsertQuery(data)
+    return new Promise((resolve, reject) => {
+      this.db.run(query, params, function (err) {
+        return err ? reject(err) : resolve(null, { lastID: this.lastID })
+      })
+    })
+  }
+
   upsert (data, cb) {
-    const res = this._buildUpsertQuery(data)
-    this.db.run(res.query, res.data, function (err) {
-      if (err) return cb(err)
-      cb(null, { lastID: this.lastID })
+    const { query, data: params } = this._buildUpsertQuery(data)
+    return this.db.run(query, params, function (err) {
+      return err ? cb(err) : cb(null, { lastID: this.lastID })
     })
   }
 
@@ -115,6 +139,17 @@ class Sqlite extends Base {
           this.upsert({ table, pkey, pval, data }, cb)
         })
       })
+  }
+
+  async cupsertAsync (opts) {
+    const { table, pkey, pval, process } = opts
+
+    const d = {}
+    d[`$${pkey}`] = `${pval}`
+
+    const getRes = await this.getAsync(`SELECT * from ${table} WHERE ${pkey} = $${pkey}`, d)
+    const data = await process(getRes)
+    return this.upsertAsync({ table, pkey, pval, data })
   }
 
   _buildUpsertQuery ({ table, pkey, pval, data }) {
