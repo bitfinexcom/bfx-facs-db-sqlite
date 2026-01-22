@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const async = require('async')
 const SqliteDb = require('sqlite3')
-const Base = require('bfx-facs-base')
+const Base = require('@bitfinex/bfx-facs-base')
 const { promisify } = require('util')
 
 class Sqlite extends Base {
