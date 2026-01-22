@@ -1,7 +1,6 @@
 {
   "name": "@bitfinex/bfx-facs-db-sqlite",
   "version": "1.0.0",
-  "private": true,
   "description": "Bitfinex DB Sqlite Facility",
   "author": {
     "name": "prdn",
