@@ -112,3 +112,13 @@ Takes an array commands to run.
   ]
 }
 ```
+
+### Test setup
+
+`sqlite3` needs its install script to download a native binary. If your npm config has
+`ignore-scripts=true`, that script is skipped and the tests fail with
+"Could not locate the bindings file". After installing, run:
+
+```bash
+npm rebuild sqlite3 --ignore-scripts=false
+```
